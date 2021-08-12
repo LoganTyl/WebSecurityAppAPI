@@ -22,7 +22,9 @@ router.post("/user/create", (req, res) => {
                     isAdmin: false
                 })
                 user.save();
-                res.send(user._id);
+                res.send({
+                    _id: user._id
+                });
             })
         }
         else{
