@@ -1,7 +1,7 @@
 const express = require("express");
 const Trivia = require("./models/Trivia");
 const User = require("./models/User");
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const router = express.Router();
 
 //Create user
@@ -79,7 +79,7 @@ router.put("/user/update", (req, res) => {
     if(validUpdate){
         User.find({email: `${req.body.email}`}, (err, account) => {
             if(account) {
-                let hash = bcrypt.hash(`${req.body.password}`, 10);
+                let hash = bcrypt.hashSync(`${req.body.password}`, 10);
                 
                 account[0].firstName = req.body.firstName,
                 account[0].lastName = req.body.lastName,
