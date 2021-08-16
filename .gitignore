@@ -1,4 +1,6 @@
 node_modules
 dist
 package-lock.json
-db
+
+db/mongod.lock
+db/WiredTiger.lock
