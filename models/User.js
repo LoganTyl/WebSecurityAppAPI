@@ -10,7 +10,8 @@ const schema = mongoose.Schema({
     city: String,
     state: String,
     zipCode: String,
-    isAdmin: Boolean
+    isAdmin: Boolean,
+    token: String
 })
 
 module.exports = mongoose.model("User", schema)

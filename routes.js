@@ -3,6 +3,20 @@ const Trivia = require("./models/Trivia");
 const User = require("./models/User");
 const bcrypt = require('bcrypt-nodejs');
 const router = express.Router();
+import { v4 as uuidv4 } from 'uuid';
+
+const authorize = async (req, res, next) => {
+    if (req.body.email && req.body.token) {
+        await User.find({email: req.body.email, token: req.body.token}, (err, account) => {
+            if (account.length) next();
+            else res.status(401).send({error: 'Unauthorized Access'});
+        });
+    } else res.status(401).send({error: 'Unauthorized Access'});
+}
+
+// const checkIfUnalteredCredentials = async (req,res,next) => {
+//     let user = JSON.parse(localStorage.getItem('user'));
+// }
 
 //Create user
 router.post("/user/create", (req, res) => {
@@ -19,7 +33,8 @@ router.post("/user/create", (req, res) => {
                     city: req.body.city,
                     state: req.body.state,
                     zipCode: req.body.state,
-                    isAdmin: false
+                    isAdmin: false,
+                    token: ""
                 })
                 user.save();
                 res.send({
@@ -48,7 +63,8 @@ router.post("/user/validate", (req, res) => {
                         street: account[0].street,
                         city: account[0].city,
                         state: account[0].state,
-                        zipCode: account[0].state
+                        zipCode: account[0].state,
+                        token: uuidv4()
                     });
                 }
                 else{
@@ -63,7 +79,7 @@ router.post("/user/validate", (req, res) => {
 })
 
 //Update user
-router.put("/user/update", (req, res) => {
+router.put("/user/update", authorize, (req, res) => {
     // res.send(req.body)
     let bodyProps = ["firstName", "lastName", "phone", "email", "password", "street", "city", "state", "zipCode"];
     let validUpdate = true;
@@ -104,7 +120,7 @@ router.put("/user/update", (req, res) => {
 })
 
 //Create question
-router.post("/question/create", (req, res) => {
+router.post("/question/create", authorize, (req, res) => {
     Trivia.find({question: `${req.body.question}`}, (err, questions) => {
         if(!questions.length){            
             const triviaQuestion = new Trivia({
@@ -124,7 +140,7 @@ router.post("/question/create", (req, res) => {
 })
 
 //Get questions not approved
-router.get("/question/pending", (req, res) => {
+router.get("/question/pending", authorize, (req, res) => {
     Trivia.find({approved: false}, (err, questions) => {
         if(questions){
             // questions.sort();
@@ -134,7 +150,7 @@ router.get("/question/pending", (req, res) => {
 })
 
 //Set question to be approved
-router.put("/question/approve/:id", (req, res) => {
+router.put("/question/approve/:id", authorize, (req, res) => {
     Trivia.findById(req.params.id, (error, question) => {
         if(question){
             question.approved = true;
@@ -148,7 +164,7 @@ router.put("/question/approve/:id", (req, res) => {
 })
 
 //Set question to be rejected
-router.put("/question/reject/:id", (req, res) => {
+router.put("/question/reject/:id", authorize, (req, res) => {
     Trivia.findById(req.params.id, (error, question) => {
         if(question){
             question.approved = false;
@@ -162,7 +178,7 @@ router.put("/question/reject/:id", (req, res) => {
 })
 
 //Get questions by category
-router.get("/question/:category", (req, res) => {
+router.get("/question/:category", authorize, (req, res) => {
     Trivia.find({category: `${req.params.category}`}, (err, questions) => {
         res.send(questions);
     })
