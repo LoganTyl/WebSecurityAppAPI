@@ -3,7 +3,7 @@ const Trivia = require("./models/Trivia");
 const User = require("./models/User");
 const bcrypt = require('bcryptjs');
 const router = express.Router();
-import { v4 as uuidv4 } from 'uuid';
+const uuid = require('uuid');
 
 const authorize = async (req, res, next) => {
     if (req.body.email && req.body.token) {
@@ -67,7 +67,7 @@ router.post("/user/validate", (req, res) => {
                     state: account[0].state,
                     zipCode: account[0].state,
                     isAdmin: account[0].isAdmin,
-                    token: uuidv4()
+                    token: uuid.v4()
                 });
             }
             else{
