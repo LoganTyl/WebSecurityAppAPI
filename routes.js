@@ -1,7 +1,7 @@
 const express = require("express");
 const Trivia = require("./models/Trivia");
 const User = require("./models/User");
-const bcrypt = require('bcrypt-nodejs');
+const bcrypt = require('bcryptjs');
 const router = express.Router();
 import { v4 as uuidv4 } from 'uuid';
 
@@ -20,27 +20,28 @@ const authorize = async (req, res, next) => {
 
 //Create user
 router.post("/user/create", (req, res) => {
+    console.log(req.body);
     User.find({email: `${req.body.email}`}, (err, account) => {
-        if(!account.length){            
-            bcrypt.hash(req.body.password, null, null, (err, hash) => {
-                const user = new User({
-                    firstName: req.body.firstName,
-                    lastName: req.body.lastName,
-                    email: req.body.email,
-                    phone: req.body.phone,
-                    hashedPassword: hash,
-                    street: req.body.street,
-                    city: req.body.city,
-                    state: req.body.state,
-                    zipCode: req.body.state,
-                    isAdmin: false,
-                    token: ""
-                })
-                user.save();
-                res.send({
-                    _id: user._id
-                });
+        if(!account.length){
+            let hash = bcrypt.hashSync(req.body.password, 10);
+            
+            const user = new User({
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                email: req.body.email,
+                phone: req.body.phone,
+                hashedPassword: hash,
+                street: req.body.street,
+                city: req.body.city,
+                state: req.body.state,
+                zipCode: req.body.state,
+                isAdmin: false,
+                token: ""
             })
+            user.save();
+            res.send({
+                _id: user._id
+            });
         }
         else{
             res.status(409).send({error: "Account already exists"});
@@ -52,25 +53,26 @@ router.post("/user/create", (req, res) => {
 router.post("/user/validate", (req, res) => {
     User.find({email: `${req.body.email}`}, (err, account) => {
         if(account.length){
-            bcrypt.compare(`${req.body.password}`, account[0].hashedPassword, (err, response) => {
-                if(response){
-                    res.send({
-                        _id: account[0]._id,
-                        firstName: account[0].firstName,
-                        lastName: account[0].lastName,
-                        email: account[0].email,
-                        phone: account[0].phone,
-                        street: account[0].street,
-                        city: account[0].city,
-                        state: account[0].state,
-                        zipCode: account[0].state,
-                        token: uuidv4()
-                    });
-                }
-                else{
-                    res.status(400).send({error: "Invalid credentials"})
-                }
-            })
+            let isAuth = bcrypt.compareSync(`${req.body.password}`, account[0].hashedPassword);
+            
+            if(isAuth){
+                res.send({
+                    _id: account[0]._id,
+                    firstName: account[0].firstName,
+                    lastName: account[0].lastName,
+                    email: account[0].email,
+                    phone: account[0].phone,
+                    street: account[0].street,
+                    city: account[0].city,
+                    state: account[0].state,
+                    zipCode: account[0].state,
+                    isAdmin: account[0].isAdmin,
+                    token: uuidv4()
+                });
+            }
+            else{
+                res.status(400).send({error: "Invalid credentials"})
+            }
         }
         else{
             res.status(400).send({error: "Invalid credentials"})
@@ -93,20 +95,21 @@ router.put("/user/update", authorize, (req, res) => {
     if(validUpdate){
         User.find({email: `${req.body.email}`}, (err, account) => {
             if(account) {
-                bcrypt.hash(`${req.body.password}`, null, null, (err,hash) => {
-                    account[0].firstName = req.body.firstName,
-                    account[0].lastName = req.body.lastName,
-                    account[0].phone = req.body.phone,
-                    account[0].hashedPassword = hash,
-                    account[0].street = req.body.street,
-                    account[0].city = req.body.city,
-                    account[0].state = req.body.state,
-                    account[0].zipCode = req.body.zipCode
-    
-                    account[0].save((error, user) => {
-                        if(err) return console.error(err);
-                        res.status(200).send(user);
-                    })
+                let hash = bcrypt.hashSync(`${req.body.password}`, 10);
+                
+                account[0].firstName = req.body.firstName,
+                account[0].lastName = req.body.lastName,
+                account[0].phone = req.body.phone,
+                account[0].hashedPassword = hash,
+                account[0].street = req.body.street,
+                account[0].city = req.body.city,
+                account[0].state = req.body.state,
+                account[0].zipCode = req.body.zipCode,
+                account[0].isAdmin = req.body.isAdmin
+
+                account[0].save((error, user) => {
+                    if(err) return console.error(err);
+                    res.status(200).send(user);
                 })
             }
             else{
