@@ -6,6 +6,7 @@ const router = express.Router();
 import { v4 as uuidv4 } from 'uuid';
 
 const authorize = async (req, res, next) => {
+    console.log(req.body);
     if (req.body.email && req.body.token) {
         await User.find({email: req.body.email, token: req.body.token}, (err, account) => {
             if (account.length) next();
