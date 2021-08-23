@@ -175,9 +175,12 @@ router.put("/question/approve/:id", authorize, async (req, res) => {
 router.put("/question/reject/:id", authorize, async (req, res) => {
     await Trivia.findById(req.params.id, async (error, question) => {
         if(question){
-            question.approved = false;
-            await question.save();
-            res.status(200).send({message: "Question approved"});
+            await Trivia.deleteOne({_id: req.params.id}, (err, n) => {
+                console.log(n);
+            });
+            // question.approved = false;
+            // await question.save();
+            // res.status(200).send({message: "Question rejected"});
         }
         else{
             res.status(400).send({error: "Invalid question"});
