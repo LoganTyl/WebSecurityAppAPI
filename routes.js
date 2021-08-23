@@ -147,7 +147,7 @@ router.post("/question/create", authorize, (req, res) => {
 })
 
 //Get questions not approved
-router.get("/question/pending", authorize, (req, res) => {
+router.get("/question/pending", (req, res) => {
     Trivia.find({approved: false}, (err, questions) => {
         if(questions){
             // questions.sort();
@@ -185,7 +185,7 @@ router.put("/question/reject/:id", authorize, (req, res) => {
 })
 
 //Get questions by category
-router.get("/question/:category", authorize, (req, res) => {
+router.get("/question/:category", (req, res) => {
     Trivia.find({category: `${req.params.category}`}, (err, questions) => {
         res.send(questions);
     })
