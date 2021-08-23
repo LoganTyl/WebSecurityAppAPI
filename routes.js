@@ -175,12 +175,10 @@ router.put("/question/approve/:id", authorize, async (req, res) => {
 router.put("/question/reject/:id", authorize, async (req, res) => {
     await Trivia.findById(req.params.id, async (error, question) => {
         if(question){
-            await Trivia.deleteOne({_id: req.params.id}, (err, n) => {
-                console.log(n);
+            await Trivia.deleteOne({_id: req.params.id}, (err, result) => {
+                if (result.deletedCount > 0) res.status(200).send({message: "Question rejected"});
+                else res.status(404).send({error: "Could not remove question"});
             });
-            // question.approved = false;
-            // await question.save();
-            // res.status(200).send({message: "Question rejected"});
         }
         else{
             res.status(400).send({error: "Invalid question"});
