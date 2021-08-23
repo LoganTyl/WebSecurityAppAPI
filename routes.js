@@ -20,9 +20,9 @@ const authorize = async (req, res, next) => {
 // }
 
 //Create user
-router.post("/user/create", (req, res) => {
+router.post("/user/create", async (req, res) => {
     console.log(req.body);
-    User.find({email: `${req.body.email}`}, (err, account) => {
+    await User.find({email: `${req.body.email}`}, async (err, account) => {
         if(!account.length){
             let hash = bcrypt.hashSync(req.body.password, 10);
             
@@ -39,7 +39,7 @@ router.post("/user/create", (req, res) => {
                 isAdmin: false,
                 token: ""
             })
-            user.save();
+            await user.save();
             res.send({
                 _id: user._id
             });
@@ -86,7 +86,7 @@ router.post("/user/validate", async (req, res) => {
 })
 
 //Update user
-router.put("/user/update", authorize, (req, res) => {
+router.put("/user/update", authorize, async (req, res) => {
     // res.send(req.body)
     let bodyProps = ["firstName", "lastName", "phone", "email", "password", "street", "city", "state", "zipCode"];
     let validUpdate = true;
@@ -98,7 +98,7 @@ router.put("/user/update", authorize, (req, res) => {
     }
 
     if(validUpdate){
-        User.find({email: `${req.body.email}`}, (err, account) => {
+        await User.find({email: `${req.body.email}`}, async (err, account) => {
             if(account) {
                 let hash = bcrypt.hashSync(`${req.body.password}`, 10);
                 
@@ -112,7 +112,7 @@ router.put("/user/update", authorize, (req, res) => {
                 account[0].zipCode = req.body.zipCode,
                 account[0].isAdmin = req.body.isAdmin
 
-                account[0].save((error, user) => {
+                await account[0].save((error, user) => {
                     if(err) return console.error(err);
                     res.status(200).send(user);
                 })
@@ -128,8 +128,8 @@ router.put("/user/update", authorize, (req, res) => {
 })
 
 //Create question
-router.post("/question/create", authorize, (req, res) => {
-    Trivia.find({question: `${req.body.question}`}, (err, questions) => {
+router.post("/question/create", authorize, async (req, res) => {
+    await Trivia.find({question: `${req.body.question}`}, async (err, questions) => {
         if(!questions.length){            
             const triviaQuestion = new Trivia({
                 question: req.body.question,
@@ -138,7 +138,7 @@ router.post("/question/create", authorize, (req, res) => {
                 category: req.body.category,
                 createdAt: new Date().getTime(),
             })
-            triviaQuestion.save();
+            await triviaQuestion.save();
             res.send(triviaQuestion);
         }
         else{
@@ -148,8 +148,8 @@ router.post("/question/create", authorize, (req, res) => {
 })
 
 //Get questions not approved
-router.get("/question/pending", (req, res) => {
-    Trivia.find({approved: false}, (err, questions) => {
+router.get("/question/pending", async (req, res) => {
+    await Trivia.find({approved: false}, async (err, questions) => {
         if(questions){
             // questions.sort();
             res.send(questions);
@@ -158,11 +158,11 @@ router.get("/question/pending", (req, res) => {
 })
 
 //Set question to be approved
-router.put("/question/approve/:id", authorize, (req, res) => {
-    Trivia.findById(req.params.id, (error, question) => {
+router.put("/question/approve/:id", authorize, async (req, res) => {
+    await Trivia.findById(req.params.id, async (error, question) => {
         if(question){
             question.approved = true;
-            question.save();
+            await question.save();
             res.status(200).send({message: "Question approved"});
         }
         else{
@@ -172,11 +172,11 @@ router.put("/question/approve/:id", authorize, (req, res) => {
 })
 
 //Set question to be rejected
-router.put("/question/reject/:id", authorize, (req, res) => {
-    Trivia.findById(req.params.id, (error, question) => {
+router.put("/question/reject/:id", authorize, async (req, res) => {
+    await Trivia.findById(req.params.id, async (error, question) => {
         if(question){
             question.approved = false;
-            question.save();
+            await question.save();
             res.status(200).send({message: "Question approved"});
         }
         else{
@@ -186,8 +186,8 @@ router.put("/question/reject/:id", authorize, (req, res) => {
 })
 
 //Get questions by category
-router.get("/question/:category", (req, res) => {
-    Trivia.find({category: `${req.params.category}`}, (err, questions) => {
+router.get("/question/:category", async (req, res) => {
+    await Trivia.find({category: `${req.params.category}`}, async (err, questions) => {
         res.send(questions);
     })
 })
