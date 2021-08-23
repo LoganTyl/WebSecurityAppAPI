@@ -3,7 +3,7 @@ const Trivia = require("./models/Trivia");
 const User = require("./models/User");
 const bcrypt = require('bcryptjs');
 const router = express.Router();
-import { v4 as uuidv4 } from 'uuid';
+const uuid = require('uuid');
 
 const authorize = async (req, res, next) => {
     console.log(req.body);
@@ -57,6 +57,10 @@ router.post("/user/validate", (req, res) => {
             let isAuth = bcrypt.compareSync(`${req.body.password}`, account[0].hashedPassword);
             
             if(isAuth){
+                let token = uuid.v4();
+                
+                User.updateOne({ email: `${account[0].email}`}, { $set: { token: `${token}` } });
+
                 res.send({
                     _id: account[0]._id,
                     firstName: account[0].firstName,
@@ -68,7 +72,7 @@ router.post("/user/validate", (req, res) => {
                     state: account[0].state,
                     zipCode: account[0].state,
                     isAdmin: account[0].isAdmin,
-                    token: uuidv4()
+                    token
                 });
             }
             else{
@@ -144,7 +148,7 @@ router.post("/question/create", authorize, (req, res) => {
 })
 
 //Get questions not approved
-router.get("/question/pending", authorize, (req, res) => {
+router.get("/question/pending", (req, res) => {
     Trivia.find({approved: false}, (err, questions) => {
         if(questions){
             // questions.sort();
@@ -182,7 +186,7 @@ router.put("/question/reject/:id", authorize, (req, res) => {
 })
 
 //Get questions by category
-router.get("/question/:category", authorize, (req, res) => {
+router.get("/question/:category", (req, res) => {
     Trivia.find({category: `${req.params.category}`}, (err, questions) => {
         res.send(questions);
     })
