@@ -51,15 +51,15 @@ router.post("/user/create", (req, res) => {
 })
 
 //Check if user exists
-router.post("/user/validate", (req, res) => {
-    User.find({email: `${req.body.email}`}, (err, account) => {
+router.post("/user/validate", async (req, res) => {
+    await User.find({email: `${req.body.email}`}, async (err, account) => {
         if(account.length){
             let isAuth = bcrypt.compareSync(`${req.body.password}`, account[0].hashedPassword);
             
             if(isAuth){
                 let token = uuid.v4();
                 
-                User.updateOne({ email: `${account[0].email}`}, { $set: { token: `${token}` } });
+                await User.updateOne({email: account[0].email}, {$set: { token }});
 
                 res.send({
                     _id: account[0]._id,
