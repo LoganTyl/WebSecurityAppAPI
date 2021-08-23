@@ -56,6 +56,10 @@ router.post("/user/validate", (req, res) => {
             let isAuth = bcrypt.compareSync(`${req.body.password}`, account[0].hashedPassword);
             
             if(isAuth){
+                let token = uuid.v4();
+                
+                User.updateOne({ email: `${account[0].email}`}, { $set: { token: `${token}` } });
+
                 res.send({
                     _id: account[0]._id,
                     firstName: account[0].firstName,
@@ -67,7 +71,7 @@ router.post("/user/validate", (req, res) => {
                     state: account[0].state,
                     zipCode: account[0].state,
                     isAdmin: account[0].isAdmin,
-                    token: uuid.v4()
+                    token
                 });
             }
             else{
