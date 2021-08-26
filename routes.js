@@ -43,7 +43,7 @@ router.post("/user/create", async (req, res) => {
             let data = {
                 _id: user._id
             }
-            res.status(200).send({message: data});
+            res.status(200).send({data: data, message: "Successfully created user"});
         }
         else{
             res.status(409).send({error: "Account already exists"});
@@ -75,7 +75,7 @@ router.post("/user/validate", async (req, res) => {
                     isAdmin: account[0].isAdmin,
                     token
                 }
-                res.status(200).send({message: data});
+                res.status(200).send({data: data, message: "Successfully validated user"});
             }
             else{
                 res.status(400).send({error: "Invalid credentials"})
@@ -116,7 +116,7 @@ router.put("/user/update", authorize, async (req, res) => {
 
                 await account[0].save((error, user) => {
                     if(err) return console.error(err);
-                    res.status(200).send({message: user});
+                    res.status(200).send({data: user, message: "Successfully updated user"});
                 })
             }
             else{
@@ -141,7 +141,7 @@ router.post("/question/create", authorize, async (req, res) => {
                 createdAt: new Date().getTime(),
             })
             await triviaQuestion.save();
-            res.status(200).send({message: triviaQuestion});
+            res.status(200).send({data: triviaQuestion, message: "Successfully created question"});
         }
         else{
             res.status(409).send({error: "Trivia question already exists!"});
@@ -154,7 +154,7 @@ router.get("/question/pending", async (req, res) => {
     await Trivia.find({approved: false}, async (err, questions) => {
         if(questions){
             // questions.sort();
-            res.status(200).send({message: questions});
+            res.status(200).send({data: questions, message: "Successfully got questions"});
         }
     })
 })
@@ -191,7 +191,7 @@ router.put("/question/reject/:id", authorize, async (req, res) => {
 //Get questions by category
 router.get("/question/:category", async (req, res) => {
     await Trivia.find({category: `${req.params.category}`}, async (err, questions) => {
-        res.status(200).send({message: questions});
+        res.status(200).send({data: questions, message: "Successfully got questions in a category"});
     })
 })
 
