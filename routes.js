@@ -40,9 +40,10 @@ router.post("/user/create", (req, res) => {
                 token: ""
             })
             user.save();
-            res.send({
+            let data = {
                 _id: user._id
-            });
+            }
+            res.status(200).send({message: data});
         }
         else{
             res.status(409).send({error: "Account already exists"});
@@ -61,7 +62,7 @@ router.post("/user/validate", async (req, res) => {
                 
                 await User.updateOne({email: account[0].email}, {$set: { token }});
 
-                res.send({
+                let data = {
                     _id: account[0]._id,
                     firstName: account[0].firstName,
                     lastName: account[0].lastName,
@@ -73,7 +74,8 @@ router.post("/user/validate", async (req, res) => {
                     zipCode: account[0].state,
                     isAdmin: account[0].isAdmin,
                     token
-                });
+                }
+                res.status(200).send({message: data});
             }
             else{
                 res.status(400).send({error: "Invalid credentials"})
@@ -114,7 +116,7 @@ router.put("/user/update", authorize, (req, res) => {
 
                 account[0].save((error, user) => {
                     if(err) return console.error(err);
-                    res.status(200).send(user);
+                    res.status(200).send({message: user});
                 })
             }
             else{
@@ -139,7 +141,7 @@ router.post("/question/create", authorize, (req, res) => {
                 createdAt: new Date().getTime(),
             })
             triviaQuestion.save();
-            res.send(triviaQuestion);
+            res.status(200).send({message: triviaQuestion});
         }
         else{
             res.status(409).send({error: "Trivia question already exists!"});
@@ -152,7 +154,7 @@ router.get("/question/pending", (req, res) => {
     Trivia.find({approved: false}, (err, questions) => {
         if(questions){
             // questions.sort();
-            res.send(questions);
+            res.staus(200).send({message: questions});
         }
     })
 })
@@ -187,8 +189,8 @@ router.put("/question/reject/:id", authorize, (req, res) => {
 
 //Get questions by category
 router.get("/question/:category", (req, res) => {
-    Trivia.find({category: `${req.params.category}`}, (err, questions) => {
-        res.send(questions);
+    Trivia.find({category: `${req.params.category}`, approved: true}, (err, questions) => {
+        res.status(200).send({message: questions});
     })
 })
 
