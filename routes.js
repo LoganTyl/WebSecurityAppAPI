@@ -154,7 +154,7 @@ router.get("/question/pending", async (req, res) => {
     await Trivia.find({approved: false}, async (err, questions) => {
         if(questions){
             // questions.sort();
-            res.staus(200).send({message: questions});
+            res.status(200).send({message: questions});
         }
     })
 })
