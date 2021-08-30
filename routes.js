@@ -15,6 +15,16 @@ const authorize = async (req, res, next) => {
     } else res.status(401).send({error: 'Unauthorized Access'});
 }
 
+const authorizeAdmin = async (req, res, next) => {
+    console.log(req.body);
+    if (req.body.email && req.body.token) {
+        await User.find({email: req.body.email, token: req.body.token}, (err, account) => {
+            if (account.length && account[0].isAdmin) next();
+            else res.status(401).send({error: 'Unauthorized Access'});
+        });
+    } else res.status(401).send({error: 'Unauthorized Access'});
+}
+
 // const checkIfUnalteredCredentials = async (req,res,next) => {
 //     let user = JSON.parse(localStorage.getItem('user'));
 // }
@@ -160,7 +170,7 @@ router.get("/question/pending", async (req, res) => {
 })
 
 //Set question to be approved
-router.put("/question/approve/:id", authorize, async (req, res) => {
+router.put("/question/approve/:id", authorizeAdmin, async (req, res) => {
     await Trivia.findById(req.params.id, async (error, question) => {
         if(question){
             question.approved = true;
@@ -174,7 +184,7 @@ router.put("/question/approve/:id", authorize, async (req, res) => {
 })
 
 //Set question to be rejected
-router.put("/question/reject/:id", authorize, async (req, res) => {
+router.put("/question/reject/:id", authorizeAdmin, async (req, res) => {
     await Trivia.findById(req.params.id, async (error, question) => {
         if(question){
             await Trivia.deleteOne({_id: req.params.id}, (err, result) => {
