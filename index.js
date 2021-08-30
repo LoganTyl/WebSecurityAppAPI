@@ -12,9 +12,9 @@ mongoose.connect("mongodb://localhost:25567/trivia_app", {useNewUrlParser: true}
     app.use(cors());
 
     app.use(express.json());
-    app.use("/api", routes)
+    app.use("/api", routes);
     
     app.listen(3000, () => {
-        console.log("Server has started")
+        console.log("Server has started on port 3000");
     });
 })

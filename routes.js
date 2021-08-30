@@ -45,7 +45,7 @@ router.post("/user/create", async (req, res) => {
                 street: req.body.street,
                 city: req.body.city,
                 state: req.body.state,
-                zipCode: req.body.state,
+                zipCode: req.body.zipCode,
                 isAdmin: false,
                 token: ""
             })
@@ -63,6 +63,7 @@ router.post("/user/create", async (req, res) => {
 
 //Check if user exists
 router.post("/user/validate", async (req, res) => {
+    console.log(req.body);
     await User.find({email: `${req.body.email}`}, async (err, account) => {
         if(account.length){
             let isAuth = bcrypt.compareSync(`${req.body.password}`, account[0].hashedPassword);
@@ -81,7 +82,7 @@ router.post("/user/validate", async (req, res) => {
                     street: account[0].street,
                     city: account[0].city,
                     state: account[0].state,
-                    zipCode: account[0].state,
+                    zipCode: account[0].zipCode,
                     isAdmin: account[0].isAdmin,
                     token
                 }
@@ -121,8 +122,7 @@ router.put("/user/update", authorize, async (req, res) => {
                 account[0].street = req.body.street,
                 account[0].city = req.body.city,
                 account[0].state = req.body.state,
-                account[0].zipCode = req.body.zipCode,
-                account[0].isAdmin = req.body.isAdmin
+                account[0].zipCode = req.body.zipCode
 
                 await account[0].save((error, user) => {
                     if(err) return console.error(err);
@@ -142,7 +142,7 @@ router.put("/user/update", authorize, async (req, res) => {
 //Create question
 router.post("/question/create", authorize, async (req, res) => {
     await Trivia.find({question: `${req.body.question}`}, async (err, questions) => {
-        if(!questions.length){            
+        if(!questions.length) {
             const triviaQuestion = new Trivia({
                 question: req.body.question,
                 answer: req.body.answer,
