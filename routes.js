@@ -160,7 +160,7 @@ router.post("/question/create", authorize, async (req, res) => {
 })
 
 //Get questions not approved
-router.get("/question/pending", async (req, res) => {
+router.get("/question/pending", authorizeAdmin, async (req, res) => {
     await Trivia.find({approved: false}, async (err, questions) => {
         if(questions){
             // questions.sort();
