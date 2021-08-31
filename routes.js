@@ -200,7 +200,7 @@ router.put("/question/reject/:id", authorizeAdmin, async (req, res) => {
 
 //Get questions by category
 router.get("/question/:category", async (req, res) => {
-    await Trivia.find({category: `${req.params.category}`}, async (err, questions) => {
+    await Trivia.find({category: `${req.params.category}`, approved: true}, async (err, questions) => {
         res.status(200).send({data: questions, message: "Successfully got questions in a category"});
     })
 })
